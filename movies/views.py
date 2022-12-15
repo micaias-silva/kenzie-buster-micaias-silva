@@ -13,12 +13,12 @@ class MoviesView(APIView):
     def post(self, request: Request) -> Response:
         data = request.data
 
-        serializer = MovieSerializer(data=data, context={"request": request})
+        serializer = MovieSerializer(data=data)
 
         if not serializer.is_valid():
             return Response(serializer.errors, 400)
 
-        serializer.save()
+        serializer.save(user=request.user)
 
         return Response(serializer.data, 201)
 

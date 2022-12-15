@@ -15,14 +15,9 @@ class MovieSerializer(serializers.Serializer):
     added_by = serializers.SerializerMethodField()
 
     def get_added_by(self, obj):
-        if self.context:
-            return self.context["request"].user.email
-
         return obj.user.email
 
     def create(self, validated_data):
-        user = self.context["request"].user
-        validated_data["user"] = user
         return Movie.objects.create(**validated_data)
 
 
