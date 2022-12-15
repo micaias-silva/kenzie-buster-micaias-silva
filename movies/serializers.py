@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from .models import Movie, RatingChoices
+from .models import Movie, MovieOrder, RatingChoices
+from datetime import datetime
+import ipdb
 
 
 class MovieSerializer(serializers.Serializer):
@@ -22,3 +24,21 @@ class MovieSerializer(serializers.Serializer):
         user = self.context["request"].user
         validated_data["user"] = user
         return Movie.objects.create(**validated_data)
+
+
+class MovieOrderSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    title = serializers.SerializerMethodField()
+    buyed_by = serializers.SerializerMethodField()
+    buyed_at = serializers.DateTimeField(read_only=True)
+    price = serializers.DecimalField(max_digits=8, decimal_places=2)
+
+    def get_title(self, obj):
+        return obj.movie.title
+
+    def get_buyed_by(self, obj):
+        return obj.buyed_by.email
+
+    def create(self, validated_data):
+        # ipdb.set_trace()
+        return MovieOrder.objects.create(**validated_data)

@@ -1,6 +1,7 @@
 from rest_framework.views import APIView, Request, Response
+from rest_framework.permissions import IsAuthenticated
 from .models import Movie
-from .serializers import MovieSerializer
+from .serializers import MovieSerializer, MovieOrderSerializer
 
 
 class MoviesView(APIView):
@@ -31,3 +32,23 @@ class MoviesIdView(APIView):
 
         except Movie.DoesNotExist:
             return Response({"detail": "Not found"}, 404)
+
+
+class MovieOrderView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request: Request, movie_id: int) -> Response:
+        try:
+            data = request.data
+            movie = Movie.objects.get(pk=movie_id)
+            serializer = MovieOrderSerializer(data=data)
+
+            if not serializer.is_valid():
+                return Response(serializer.errors, 400)
+
+            serializer.save(buyed_by=request.user, movie=movie)
+
+            return Response(serializer.data, 201)
+
+        except Movie.DoesNotExist:
+            return Response({"detail": "Not found"})
